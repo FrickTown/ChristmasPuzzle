@@ -5,15 +5,57 @@
 }
 
 body{
+    display: flex;
+    align-items: center;
+    justify-content: center;
     width: 100vw;
     height: 100vh;
+    flex-wrap: wrap;
 }
 
 main{
     display: flex;
+    box-sizing: border-box;
+}
+
+canvas {
+    display: flex;
+    transform: scale(1);
     align-items: center;
     justify-content: center;
-    height: 100%;
+    transition: ease-out;
+    transition-duration: 0.3s;
 }
-canvas {
+
+section {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+section h3 {
+    display: flexbox;
+    text-align: center;
+    width: 100%;
+    font-family: sans-serif;
+
+}
+
+#zoomer {
+    display: flex;
+}
+
+div {
+    display: flex;
+    flex-wrap: wrap;
+    text-align: center;
+    height: auto;
+    width: 100%;
+    height:20%;
+}
+
+div h3 {
+    width:100%;
 }

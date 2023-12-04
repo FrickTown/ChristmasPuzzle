@@ -14,6 +14,7 @@ function setup(){
     winImage = loadImage("resources/winImage.png");
     canvas = createCanvas(displayWidth, displayWidth);
     domCtx = canvas.elt;
+    //debug();
     segmentWidth = canvas.width / xBy;
     segmentHeight = canvas.height / xBy;
     for(let y = 0; y < xBy; y++){
@@ -23,6 +24,15 @@ function setup(){
         }
         Segments.push(row);
     }
+    document.getElementById("zoomer").addEventListener("input", handleZoomer);
+}
+
+function debug(){
+    var debugs = document.querySelectorAll("h3");
+    debugs[0].innerHTML = displayWidth;
+    debugs[1].innerHTML = domCtx.clientWidth;
+    debugs[2].innerHTML = document.body.clientWidth
+    debugs[3].innerHTML = canvas.width;
 }
 
 function draw(){
@@ -35,13 +45,20 @@ function draw(){
 }
 
 var lastTouch = new MouseEvent("");
+var isTouching = false;
 
 function touchStarted(event){
+    if(event.target == document.getElementById("zoomer")){
+        return true;
+    }
     console.log(event);
     if(typeof event.changedTouches[0] == undefined)
         return false;
     if(event.changedTouches > 1)
         return false;
+    if(isTouching)
+        return false;
+    isTouching = true;
     let touchInfo = event.changedTouches[0];
     let mouseSeg = mouseToSegment(touchInfo.pageX, touchInfo.pageY);
     //console.log(mouseSeg);
@@ -57,6 +74,9 @@ var horizontalUnlocked = 1;
 var verticalUnlocked = 1;
 
 function touchMoved(event){
+    if(event.target == document.getElementById("zoomer")){
+        return true;
+    }
     if(event.changedTouches === undefined || event.changedTouches === null)
         return false;
     if(event.changedTouches.length > 1)
@@ -88,6 +108,7 @@ function touchMoved(event){
 function touchEnded(event){
     if(event.changedTouches.length > 1)
         return false;
+    isTouching = false;
     if(typeof selectedSubset == "undefined")
         return;
     snapBack().then(() => {
@@ -205,8 +226,6 @@ async function snapBack(){
         return;
 
     if(horizontalUnlocked && !verticalUnlocked){
-        let leftCenter = segmentWidth / 2;
-        let rightCenter = width - (segmentWidth / 2);
         let deltaX = onFringe.xPos % segmentWidth;
         console.log(selectedSubset);
         if(onFringe.xPos < 0){
@@ -247,11 +266,41 @@ async function snapBack(){
         console.log(selectedSubset);
     }
     if(verticalUnlocked && !horizontalUnlocked){
-        let deltaY = - (onFringe.yPos % segmentHeight);
+        let deltaY = onFringe.yPos % segmentHeight;
         console.log(deltaY);
-        for (let i = 0; i < selectedSubset.length; i++) {
-            let element = selectedSubset[i];
-            element.yPos += deltaY
+        if(onFringe.yPos < 0){
+            if(Math.abs(onFringe.yPos) > segmentHeight/2){
+                for (let i = 0; i < selectedSubset.length; i++) {
+                    let element = selectedSubset[i];
+                    let rest = segmentHeight + deltaY;
+                    element.yPos -= rest;
+                }
+                onFringe.yPos = height - segmentHeight;
+            }
+            else{
+                for (let i = 0; i < selectedSubset.length; i++) {
+                    let element = selectedSubset[i];
+                    element.yPos -= deltaY;
+                }
+                onFringe.yPos = 0;
+            }
+        }
+        else{
+            if(onFringe.bottom() > height + (segmentHeight/2)){
+                for (let i = 0; i < selectedSubset.length; i++) {
+                    let element = selectedSubset[i];
+                    let rest = segmentHeight - deltaY;
+                    element.yPos += rest;
+                }
+                onFringe.yPos = 0;
+            }
+            else{
+                for (let i = 0; i < selectedSubset.length; i++) {
+                    let element = selectedSubset[i];
+                    element.yPos -= deltaY;
+                }
+                onFringe.yPos = height - segmentHeight;
+            }
         }
     }
 
@@ -300,4 +349,9 @@ function updateAndDraw(){
             element.draw();
         })
     });
+}
+
+function handleZoomer(e){
+    console.log(e.target.value);
+    domCtx.style.transform = "scale("+(e.target.value/100)+")";
 }

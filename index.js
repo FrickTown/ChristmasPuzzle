@@ -8,11 +8,13 @@ var puzzleImage
 var winImage;
 var selected;
 var selectedSubset;
+var boardScale = 1;
+var boardCenter = () => {return {x: domCtx.clientLeft + (domCtx.clientWidth/2), y: domCtx.clientTop + (domCtx.clientHeight/2)}};
 
 function setup(){
     puzzleImage = loadImage("resources/puzzleImage.png");
     winImage = loadImage("resources/winImage.png");
-    canvas = createCanvas(displayWidth, displayWidth);
+    canvas = createCanvas(Math.min(displayHeight, displayWidth), Math.min(displayHeight, displayWidth));
     domCtx = canvas.elt;
     //debug();
     segmentWidth = canvas.width / xBy;
@@ -24,6 +26,7 @@ function setup(){
         }
         Segments.push(row);
     }
+    shuffleBoard();
     document.getElementById("zoomer").addEventListener("input", handleZoomer);
 }
 
@@ -39,7 +42,7 @@ function draw(){
     background(0,0,200);
 
     ellipse(mouseX, mouseY, 40, 40);
-    let mouseSeg = mouseToSegment(mouseX, mouseY);
+    //let mouseSeg = mouseToSegment(mouseX, mouseY);
     updateAndDraw();
     //image(puzzleImage, 0, 0);
 }
@@ -52,7 +55,7 @@ function touchStarted(event){
         return true;
     }
     console.log(event);
-    if(typeof event.changedTouches[0] == undefined)
+    if(typeof event.changedTouches[0] == "undefined")
         return false;
     if(event.changedTouches > 1)
         return false;
@@ -77,7 +80,7 @@ function touchMoved(event){
     if(event.target == document.getElementById("zoomer")){
         return true;
     }
-    if(event.changedTouches === undefined || event.changedTouches === null)
+    if(typeof event.changedTouches == "undefined" || event.changedTouches === null)
         return false;
     if(event.changedTouches.length > 1)
         return false;
@@ -95,7 +98,7 @@ function touchMoved(event){
             selectedSubset = selected.column;
         }
     }
-    console.log(xChange + ", " + yChange);
+    //console.log(xChange + ", " + yChange);
     for(var i = 0; i < selectedSubset.length; i++){
         selectedSubset[i].xPos += xChange * horizontalUnlocked;
         selectedSubset[i].yPos += yChange * verticalUnlocked;
@@ -175,6 +178,10 @@ function Segment(xC, yC){
 
 function mouseToCanvas(x, y){
     let localBounds = domCtx.getBoundingClientRect();
+    let translatedMouse = {
+        tx: x + (((x - boardCenter().x) * 1/boardScale) - (x - boardCenter().x)),
+        ty: y +((y - boardCenter().y) * 1/boardScale)
+    }
     let localMouse = {
         x: (x >= 0) ? Math.min(x - localBounds.x, canvas.width-1) : 0,
         y: (y >= 0) ? Math.min(y - localBounds.y, canvas.height-1) : 0
@@ -183,16 +190,22 @@ function mouseToCanvas(x, y){
 }
 
 function canvasToSegment(x, y){
-    return {x: Math.floor(x / segmentWidth), y: Math.floor(y / segmentHeight)};
+    return {x: Math.floor((x * 1/boardScale) / segmentWidth), y: Math.floor((y * 1/boardScale) / (segmentHeight))};
 }
 
 function mouseToSegment(x, y){
+    let localBounds = domCtx.getBoundingClientRect();
     let s1 = mouseToCanvas(x, y);
+    console.log(s1);
+    //segmentWidth = localBounds.width / xBy;
+    //segmentHeight = localBounds.height / xBy;
     let s2 = canvasToSegment(s1.x, s1.y);
     if(s2.x < 0)
         s2.x = 0;
     if(s2.y < 0)
         s2.y = 0;
+    console.log(s2);
+    console.log(Segments[s2.y][s2.x]);
     return s2;
 }
 
@@ -321,7 +334,7 @@ function checkWinCondition(){
             }
         }
     }
-    //alert("Wioo");
+    alert("Wioo");
 }
 
 async function cloneAndRealign(){
@@ -329,7 +342,7 @@ async function cloneAndRealign(){
     for(let i = 0; i < Segments.length; i++){
         for(let j = 0; j < Segments[i].length; j++){
             let element = Segments[i][j];
-            let deez = canvasToSegment(element.xPos + 10, element.yPos + 10);
+            let deez = canvasToSegment(element.xPos, element.yPos);
             //console.log(deez);
             out[deez.y][deez.x] = element;
         }
@@ -353,5 +366,49 @@ function updateAndDraw(){
 
 function handleZoomer(e){
     console.log(e.target.value);
-    domCtx.style.transform = "scale("+(e.target.value/100)+")";
+    boardScale = e.target.value/100;
+    domCtx.style.transform = "scale(" + boardScale + ")";
+}
+
+function shuffleBoard(){
+    //Number of swaps to make
+    /*let intensity = 10;
+    for(var i = 0; i < intensity; i++){
+        let toCloneY = Math.round(Math.random() * Segments.length-1);
+        let toCloneX = Math.round(Math.random() * Segments[toCloneY].length-1);
+        console.log({toCloneX, toCloneY});
+    }
+    */
+    console.log("Before:")
+    console.log(Segments);
+    shuffle(Segments, true);
+    console.log("After 1st");
+    console.log(Segments);
+    console.log("After 2nd");
+    for(let i = 0; i < xBy; i++){
+        let column = [];
+        console.log(column);
+        for(let j = 0; j < xBy; j++){
+            column.push(Segments[j][i]);
+        }
+        shuffle(column, true);
+        /*column.filter((el) => {
+            return typeof el != "undefined";
+        });*/
+        console.log(column);
+        for(let col = 0; col < column.length; col++){
+            Segments[col][i] = column[col];
+        }
+    }
+    console.log(Segments);
+    updatePosByOrder();
+}
+
+function updatePosByOrder(){
+    for(let i = 0; i < Segments.length; i++){
+        for(let j = 0; j < Segments[i].length; j++){
+            Segments[i][j].xPos = j * segmentWidth;
+            Segments[i][j].yPos = i * segmentHeight;
+        }
+    }
 }

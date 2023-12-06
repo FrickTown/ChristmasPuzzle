@@ -11,6 +11,24 @@ body{
     width: 100vw;
     height: 100vh;
     flex-wrap: wrap;
+    background-image: url(./resources/galaxy.jpg);
+    background-position: 0% 0%;
+    background-size: auto;
+    animation: 20s linear 0s infinite leftToRight_Win, 10s linear 0s infinite topToBottom_Win;
+    transition: 2s;
+}
+
+#curtain{
+    display: flex;
+    position: fixed;
+    width: 100%;
+    background: rgba(255,255,255,1.0);
+    height: 100%;
+    background-image: url(./resources/sad/sadness.jpg);
+    background-position: 0% 0%;
+    animation: 30s linear 0s infinite leftToRight, 30s linear 0s infinite topToBottom;
+    background-size: 150vw 150vh;
+    transition: 2s;
 }
 
 main{
@@ -25,14 +43,17 @@ canvas {
     justify-content: center;
     transition: ease-out;
     transition-duration: 0.3s;
+    border: 10px solid rgba(255,255,255,0.9);
+    border-radius: 8%;
 }
 
-section {
+#zoomsection {
     width: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-wrap: wrap;
+    transition: 1s;
 }
 
 section h3 {
@@ -58,4 +79,46 @@ div {
 
 div h3 {
     width:100%;
+}
+
+@keyframes leftToRight{
+    0% {
+        background-position-x: 0px;
+    }
+    100% {
+        background-position-x: -1500px;
+    }
+}
+
+@keyframes topToBottom {
+    0% {
+        background-position-y: 0px;
+    }
+    100% {
+        background-position-y: -3650px;
+    }
+}
+
+@keyframes leftToRight_Win{
+    0% {
+        background-position-x: 0px;
+    }
+    100% {
+        background-position-x: -3840px;
+    }
+}
+
+@keyframes topToBottom_Win{
+    0% {
+        background-position-y: 0px;
+    }
+    100% {
+        background-position-y: -2160px;
+    }
+}
+
+@keyframes topLeft-botRight {
+    0% {
+        background-position: 100px;
+    }
 }

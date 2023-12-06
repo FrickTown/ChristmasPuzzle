@@ -10,12 +10,15 @@ var selected;
 var selectedSubset;
 var boardScale = 1;
 var boardCenter = () => {return {x: domCtx.clientLeft + (domCtx.clientWidth/2), y: domCtx.clientTop + (domCtx.clientHeight/2)}};
+var displayWinCondition = false;
+var font;
 
 function setup(){
     puzzleImage = loadImage("resources/puzzleImage.png");
     winImage = loadImage("resources/winImage.png");
     canvas = createCanvas(Math.min(displayHeight, displayWidth), Math.min(displayHeight, displayWidth));
     domCtx = canvas.elt;
+    font = loadFont('./resources/gasoek.ttf');
     //debug();
     segmentWidth = canvas.width / xBy;
     segmentHeight = canvas.height / xBy;
@@ -39,12 +42,18 @@ function debug(){
 }
 
 function draw(){
-    background(0,0,200);
+    background(0,0,200, 0);
 
     ellipse(mouseX, mouseY, 40, 40);
-    //let mouseSeg = mouseToSegment(mouseX, mouseY);
-    updateAndDraw();
-    //image(puzzleImage, 0, 0);
+
+    if(!displayWinCondition){
+        updateAndDraw();
+    }
+    else {
+        fill("red");
+        ellipse(canvas.width/2, canvas.height/2, 10);
+        drawWin();
+    }
 }
 
 var lastTouch = new MouseEvent("");
@@ -183,14 +192,14 @@ function mouseToCanvas(x, y){
         ty: y +((y - boardCenter().y) * 1/boardScale)
     }
     let localMouse = {
-        x: (x >= 0) ? Math.min(x - localBounds.x, canvas.width-1) : 0,
-        y: (y >= 0) ? Math.min(y - localBounds.y, canvas.height-1) : 0
+        x: (x >= 0) ? Math.min(x - localBounds.x, localBounds.right) : 0,
+        y: (y >= 0) ? Math.min(y - localBounds.y, localBounds.bottom) : 0
     }
     return localMouse;
 }
 
 function canvasToSegment(x, y){
-    return {x: Math.floor((x * 1/boardScale) / segmentWidth), y: Math.floor((y * 1/boardScale) / (segmentHeight))};
+    return {x: Math.min(Math.floor((x * 1/boardScale) / segmentWidth), xBy-1), y: Math.min(Math.floor((y * 1/boardScale) / (segmentHeight)), xBy-1)};
 }
 
 function mouseToSegment(x, y){
@@ -225,7 +234,6 @@ function selectRowAndColumn(x, y){
 async function snapBack(){
     updateAndDraw();
     let onFringe;
-    let allChange = {x: 0, y: 0};
 
     for(let i = 0; i < selectedSubset.length; i++){
         let e = selectedSubset[i];
@@ -321,7 +329,7 @@ async function snapBack(){
         console.log(Segments);
         console.log(resolve);
         Segments = resolve;
-        checkWinCondition();
+        setTimeout(() => {checkWinCondition();}, 250);
     });
 }
 
@@ -334,7 +342,8 @@ function checkWinCondition(){
             }
         }
     }
-    alert("Wioo");
+    toggleWinBackground();
+    displayWinCondition = true;
 }
 
 async function cloneAndRealign(){

@@ -31,6 +31,7 @@ function setup(){
     }
     shuffleBoard();
     document.getElementById("zoomer").addEventListener("input", handleZoomer);
+    setInterval(() => {if (!isTouching){horizontalUnlocked = 1; verticalUnlocked = 1;}})
 }
 
 function debug(){
@@ -63,6 +64,8 @@ function touchStarted(event){
     if(event.target == document.getElementById("zoomer")){
         return true;
     }
+    if(event.changedTouches.length > 1)
+        return false;
     console.log(event);
     if(typeof event.changedTouches[0] == "undefined")
         return false;

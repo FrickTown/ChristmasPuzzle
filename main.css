@@ -21,14 +21,16 @@ body{
 #curtain{
     display: flex;
     position: fixed;
-    width: 100%;
+    width: 150%;
     background: rgba(255,255,255,1.0);
-    height: 100%;
+    height: 150%;
     background-image: url(./resources/sad/sadness.jpg);
     background-position: 0% 0%;
     animation: 30s linear 0s infinite leftToRight, 30s linear 0s infinite topToBottom;
     background-size: 150vw 150vh;
     transition: 2s;
+    left: 0;
+    top: 0;
 }
 
 main{

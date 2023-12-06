@@ -92,6 +92,9 @@ function touchMoved(event){
     if(event.target == document.getElementById("zoomer")){
         return true;
     }
+    if(typeof selected == "undefined")
+        return false;
+    
     if(typeof event.changedTouches == "undefined" || event.changedTouches === null)
         return false;
     if(event.changedTouches.length > 1)

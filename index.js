@@ -357,6 +357,7 @@ async function cloneAndRealign(){
             let deez = canvasToSegment(element.xPos, element.yPos);
             //console.log(deez);
             out[deez.y][deez.x] = element;
+            //if(typeof out[deez.y][deez.x].update == "undefined")
         }
     }
     return out;
@@ -368,7 +369,9 @@ function updateAndDraw(){
             //fill(element.color);
             //rect(element.xPos, element.yPos, segmentWidth, segmentHeight);
             if(typeof element.update != "function"){
+                console.log("WARNING");
                 console.log(element);
+                element = tryCast(element);
             }
             element.update();
             element.draw();
@@ -423,4 +426,12 @@ function updatePosByOrder(){
             Segments[i][j].yPos = i * segmentHeight;
         }
     }
+}
+
+
+function tryCast(obj){
+    let dummy = new Segment(0,0);
+    obj.update = dummy.update;
+    obj.draw = dummy.draw;
+    return obj;
 }

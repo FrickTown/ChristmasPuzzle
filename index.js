@@ -1,5 +1,5 @@
 var Segments = [];
-var xBy = 4;
+var xBy = 5;
 var segmentWidth;
 var segmentHeight;
 var canvas;
